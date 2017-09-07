@@ -1,3 +1,9 @@
+<?php 
+if(isset($_GET['envelope'])) {
+	$envelope = $_GET['envelope'];
+}
+?>
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -44,12 +50,12 @@
 	</style>
 </head>
 <body>
-	<p id='header' class='elements'>Envelope</p>
+	<p id='header' class='elements'><?php echo $envelope; ?></p>
 	<form>
 		<input id='amount' class='elements' type='number' name='amount' placeholder='enter amount'>
 		<input id='submit' class='elements' type='submit' name='submit' value='Spend'>
 	</form>
-	<a href='www.google.com'><button id='cancel' class='elements'>Cancel</button></a>
+	<a href='/envelopes'><button id='cancel' class='elements'>Cancel</button></a>
 </body>
 </html>
 
