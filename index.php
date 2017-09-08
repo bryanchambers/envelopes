@@ -3,8 +3,8 @@
 
 
 
-function displayEnvelope($name, $refill, $balance) {
-	$width = round(($balance / $refill) * 100) . '%';
+function displayEnvelope($name, $goal, $balance) {
+	$width = round(($balance / $goal) * 100) . '%';
 
 	echo "<a href='spend.php?envelope=$name'>";
 		echo "<div class='basics envelope'>";

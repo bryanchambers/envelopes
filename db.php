@@ -31,7 +31,25 @@ function dbGetWarnings($dbc) {
 
 
 
+function tableDefs($table) {
+	$defs = [];
+
+	$defs['envelopes'] = "
+		CREATE TABLE IF NOT EXISTS envelopes(
+			id      INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
+			name    VARCHAR(50) NOT NULL,
+			refill  INT,
+			goal    INT,
+			balance INT)";
+
+	return $defs[$table];
+}
+
+
+
+
 function dbCreateTable($dbc, $table, $query) {
+	echo $query;
 	$dbc->query($query);
 	
 	$warnings = dbGetWarnings($dbc);
