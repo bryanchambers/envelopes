@@ -98,12 +98,12 @@ function getEnvelopeID($dbc, $name) {
 
 
 
-function addEnvelope($dbc, $name, $refill, $cycle) {
+function addEnvelope($dbc, $name, $refill, $goal) {
 	try {
-		$query = $dbc->prepare("INSERT INTO envelopes(name, refill_amount, refill_cycle) VALUES(:name, :refill, :cycle)");
+		$query = $dbc->prepare("INSERT INTO envelopes(name, refill, goal) VALUES(:name, :refill, :goal)");
 		$query->bindParam(':name',   $name);
 		$query->bindParam(':refill', $refill);
-		$query->bindParam(':cycle',  $cycle);
+		$query->bindParam(':goal',  $goal);
 		
 		$query->execute();
 		return false;
@@ -145,10 +145,10 @@ function increaseBalance($dbc, $id, $change) {
 
 
 
-function changeRefillAmount($dbc, $id, $amount) {
+function changeRefill($dbc, $id, $refill) {
 	try {
-		$query = $dbc->prepare("UPDATE envelopes SET refill_amount=:amount WHERE id=:id");
-		$query->bindParam(':amount', $amount);
+		$query = $dbc->prepare("UPDATE envelopes SET refill=:refill WHERE id=:id");
+		$query->bindParam(':refill', $refill);
 		$query->bindParam(':id',     $id);
 		
 		$query->execute();
@@ -160,10 +160,10 @@ function changeRefillAmount($dbc, $id, $amount) {
 
 
 
-function changeRefillCycle($dbc, $id, $cycle) {
+function changeGoal($dbc, $id, $goal) {
 	try {
-		$query = $dbc->prepare("UPDATE envelopes SET refill_cycle=:cycle WHERE id=:id");
-		$query->bindParam(':cycle', $cycle);
+		$query = $dbc->prepare("UPDATE envelopes SET goal=:goal WHERE id=:id");
+		$query->bindParam(':goal', $goal);
 		$query->bindParam(':id',    $id);
 		
 		$query->execute();
