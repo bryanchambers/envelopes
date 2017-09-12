@@ -64,18 +64,14 @@ function dbCreateTable($dbc, $table, $query) {
 
 
 
-function dbDropTable($dbc, $table, $confirm) {
-	if($confirm) {
-		$dbc->query("DROP TABLE IF EXISTS $table");
-		
-		$warnings = dbGetWarnings($dbc);
-		if($warnings) {
-			return $warnings;
-		} else {
-			return "Dropped table $table";
-		}
+function dbDropTable($dbc, $table) {
+	$dbc->query("DROP TABLE IF EXISTS $table");
+	
+	$warnings = dbGetWarnings($dbc);
+	if($warnings) {
+		return $warnings;
 	} else {
-		return "Confirmation flag is false";
+		return "Dropped table $table";
 	}
 }
 
