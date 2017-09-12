@@ -37,7 +37,7 @@ function tableDefs($table) {
 	$defs['envelopes'] = "
 		CREATE TABLE IF NOT EXISTS envelopes(
 			id      INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-			name    VARCHAR(50) NOT NULL,
+			name    VARCHAR(30) UNIQUE KEY NOT NULL,
 			refill  INT,
 			goal    INT,
 			balance INT)";
@@ -163,7 +163,7 @@ function increaseBalance($dbc, $id, $change) {
 
 
 
-function changeRefill($dbc, $id, $refill) {
+function setRefill($dbc, $id, $refill) {
 	try {
 		$query = $dbc->prepare("UPDATE envelopes SET refill=:refill WHERE id=:id");
 		$query->bindParam(':refill', $refill);
@@ -178,7 +178,7 @@ function changeRefill($dbc, $id, $refill) {
 
 
 
-function changeGoal($dbc, $id, $goal) {
+function setGoal($dbc, $id, $goal) {
 	try {
 		$query = $dbc->prepare("UPDATE envelopes SET goal=:goal WHERE id=:id");
 		$query->bindParam(':goal', $goal);

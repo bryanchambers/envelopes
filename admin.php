@@ -1,4 +1,55 @@
 <?php 
+
+/*
+
+SUPER ADMIN
+------------
+db create [name]
+db drop [name]
+empty [name]
+set [name] balance to [value]
+
+
+ADMIN
+--------
+create [name]
+rename [old name] to [new name]
+set [name] goal to [value]
+set [name] refill to [value]
+
+
+
+
+COMMANDS
+----------
+db
+	create*
+	drop*
+create
+set
+	goal
+	refill
+	balance*
+rename
+empty*
+
+
+
+*/
+
+echo parseCMD($_GET['cmd']);
+
+function parseCMD($str) {
+	$cmd = explode($str, ' ');
+	if(count($cmd) > 1) {
+
+	} else {
+		return 'Invalid command';
+	}
+}
+
+
+
 ?>
 
 <!DOCTYPE html>
