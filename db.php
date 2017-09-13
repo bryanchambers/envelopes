@@ -1,7 +1,7 @@
 <?php
 
 function dbConnect() {
-	$file = file_get_contents('db_connect.json', FILE_USE_INCLUDE_PATH);
+	$file = file_get_contents('db-connect.json', FILE_USE_INCLUDE_PATH);
 	$info = json_decode($file, true);
 
 	$host     = $info['host'];
@@ -36,8 +36,7 @@ function tableDefs($table) {
 
 	$defs['envelopes'] = "
 		CREATE TABLE IF NOT EXISTS envelopes(
-			id      INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-			name    VARCHAR(30) UNIQUE KEY NOT NULL,
+			name    VARCHAR(30) PRIMARY KEY NOT NULL,
 			refill  INT,
 			goal    INT,
 			balance INT)";
@@ -49,14 +48,13 @@ function tableDefs($table) {
 
 
 function dbCreateTable($dbc, $table, $query) {
-	echo $query;
 	$dbc->query($query);
 	
 	$warnings = dbGetWarnings($dbc);
 	if($warnings) {
-		return $warnings;
+		return "Database warning *<span class='error'>$warnings</span>*";
 	} else {
-		return "Created table $table";
+		return "Created table $table.";
 	}
 }
 
@@ -69,9 +67,9 @@ function dbDropTable($dbc, $table) {
 	
 	$warnings = dbGetWarnings($dbc);
 	if($warnings) {
-		return $warnings;
+		return "Database warning *<span class='error'>$warnings</span>*";
 	} else {
-		return "Dropped table $table";
+		return "Dropped table $table.";
 	}
 }
 
@@ -104,15 +102,15 @@ function getEnvelopes($dbc) {
 
 
 
-function getEnvelopeID($dbc, $name) {
-	$query_string = "SELECT id, name FROM envelopes WHERE LIMIT 1";
-	return getData($query_string, $dbc);
-}
 
 
 
 
-function addEnvelope($dbc, $name, $refill, $goal) {
+
+
+
+
+function createEnvelope($dbc, $name, $refill, $goal) {
 	try {
 		$query = $dbc->prepare("INSERT INTO envelopes(name, refill, goal) VALUES(:name, :refill, :goal)");
 		$query->bindParam(':name',   $name);
@@ -120,84 +118,111 @@ function addEnvelope($dbc, $name, $refill, $goal) {
 		$query->bindParam(':goal',  $goal);
 		
 		$query->execute();
-		return false;
+		return "Created new envelope $name with a refill of $refill and a goal of $goal.";
 	} catch(PDOException $err) {
-		return $err->getMessage();
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
 	}
 }
 
 
-function reduceBalance($dbc, $id, $change) {
+function changeBalance($dbc, $envelope, $change) {
 	try {
-		$change = abs($change);
-		$query  = $dbc->prepare("UPDATE envelopes SET balance=balance-:change WHERE id=:id");
-		$query->bindParam(':change', $change);
-		$query->bindParam(':id',      $id);
+		if($change >= 0) {
+			$sign     = '+';
+			$signtxt  = 'Increased';
+		} else {
+			$change  = abs($change);
+			$sign    = '-';
+			$signtxt = 'Decreased';
+		}
+		
+		$query  = $dbc->prepare("UPDATE envelopes SET balance=balance" . $sign . ":change WHERE name=:envelope LIMIT 1");
+		$query->bindParam(':change',   $change);
+		$query->bindParam(':envelope', $envelope);
 		
 		$query->execute();
-		return false;
+		return "$signtxt $envelope balance by $change.";
 	} catch(PDOException $err) {
-		return $err->getMessage();
-	}
-}
-
-
-
-function increaseBalance($dbc, $id, $change) {
-	try {
-		$change = abs($change);
-		$query  = $dbc->prepare("UPDATE envelopes SET balance=balance+:change WHERE id=:id");
-		$query->bindParam(':change', $change);
-		$query->bindParam(':id',      $id);
-		
-		$query->execute();
-		return false;
-	} catch(PDOException $err) {
-		return $err->getMessage();
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
 	}
 }
 
 
 
-function setRefill($dbc, $id, $refill) {
+
+
+
+function setBalance($dbc, $envelope, $balance) {
 	try {
-		$query = $dbc->prepare("UPDATE envelopes SET refill=:refill WHERE id=:id");
-		$query->bindParam(':refill', $refill);
-		$query->bindParam(':id',     $id);
+		$query = $dbc->prepare("UPDATE envelopes SET balance=:balance WHERE name=:envelope LIMIT 1");
+		$query->bindParam(':balance',  $balance);
+		$query->bindParam(':envelope', $envelope);
 		
 		$query->execute();
-		return false;
+		return "Set $envelope balance to $balance.";
 	} catch(PDOException $err) {
-		return $err->getMessage();
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
 	}
 }
 
 
 
-function setGoal($dbc, $id, $goal) {
+
+
+
+function setRefill($dbc, $envelope, $refill) {
 	try {
-		$query = $dbc->prepare("UPDATE envelopes SET goal=:goal WHERE id=:id");
-		$query->bindParam(':goal', $goal);
-		$query->bindParam(':id',    $id);
+		$query = $dbc->prepare("UPDATE envelopes SET refill=:refill WHERE name=:envelope LIMIT 1");
+		$query->bindParam(':refill',   $refill);
+		$query->bindParam(':envelope', $envelope);
 		
 		$query->execute();
-		return false;
+		return "Set $envelope refill to $refill";
 	} catch(PDOException $err) {
-		return $err->getMessage();
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
 	}
 }
 
 
 
-function renameEnvelope($dbc, $id, $name) {
+function setGoal($dbc, $envelope, $goal) {
 	try {
-		$query = $dbc->prepare("UPDATE envelopes SET name=:name WHERE id=:id");
-		$query->bindParam(':name', $name);
-		$query->bindParam(':id',   $id);
+		$query = $dbc->prepare("UPDATE envelopes SET goal=:goal WHERE name=:envelope LIMIT 1");
+		$query->bindParam(':goal',     $goal);
+		$query->bindParam(':envelope', $envelope);
 		
 		$query->execute();
-		return false;
+		return "Set $envelope goal to $goal.";
 	} catch(PDOException $err) {
-		return $err->getMessage();
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
+	}
+}
+
+
+
+function renameEnvelope($dbc, $old, $new) {
+	try {
+		$query = $dbc->prepare("UPDATE envelopes SET name=:new WHERE name=:old LIMIT 1");
+		$query->bindParam(':old', $old);
+		$query->bindParam(':new', $new);
+		
+		$query->execute();
+		return "Renamed $old to $new.";
+	} catch(PDOException $err) {
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
+	}
+}
+
+
+
+function emptyEnvelope($dbc, $envelope) {
+	try {
+		$query = $dbc->prepare("UPDATE envelopes SET balance=0 WHERE name=:envelope LIMIT 1");
+		$query->bindParam(':envelope', $envelope);
+		
+		$query->execute();
+		return "Set $envelope balance to 0.";
+	} catch(PDOException $err) {
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
 	}
 }

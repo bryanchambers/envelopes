@@ -12,7 +12,7 @@ set [name] balance to [value]
 
 ADMIN
 --------
-create [name]
+create [name] [refill] [goal]
 rename [old name] to [new name]
 set [name] goal to [value]
 set [name] refill to [value]
@@ -37,7 +37,7 @@ empty*
 
 */
 
-
+require 'db.php';
 
 
 
@@ -75,16 +75,6 @@ function parseCommand() {
 
 
 
-function isSuperAdmin() {
-	if(isset($_GET['super']) && $_GET['super'] == 'true') {
-		return true;
-	} else {
-		return false;
-	}
-}
-
-
-
 
 
 
@@ -95,28 +85,33 @@ function cmdHandler($cmd) {
 	$type  = $words[0];
 
 	switch($type) {
-		case 'db':
-			if(count($words) == 3) { return cmdDB($words[1], $words[2]); }             // Subtype, Table Name
+		case 'db*':
+			if(count($words) == 3) { return cmdDB($words[1], $words[2]); }                 // Subtype, Table Name
 			else { return false; }
 		break;
 
 		case 'create':
-			if(count($words) == 2) { return cmdCreate($words[1]); }                    // New Envelope Name
-			else { return false; }
-		break;
-
-		case 'set':
-			if(count($words) == 5) { return cmdSet($words[1], $words[2], $words[4]); } // Envelope Name, Attribute, Value
+			if(count($words) == 4) { return cmdCreate($words[1], $words[2], $words[3]); } // Name, Refill, Goal
 			else { return false; }
 		break;
 
 		case 'rename':
-			if(count($words) == 4) { return cmdRename($words[1], $words[2]); }         // Old Envelope Name, New Envelope Name
+			if(count($words) == 4) { return cmdRename($words[1], $words[2]); }             // Old Name, New Name
 			else { return false; }
 		break;
 
-		case 'empty':
-			if(count($words) == 2) { return cmdEmpty($words[1]); }                     // Envelope Name
+		case 'set':
+			if(count($words) == 5) { return cmdSet($words[1], $words[2], $words[4]); }     // Envelope, Attribute, Value
+			else { return false; }
+		break;
+
+		case 'transfer':
+			if(count($words) == 6) { return cmdRename($words[1], $words[3], $words[5]); }  // Amount, From, To
+			else { return false; }
+		break;
+
+		case 'empty*':
+			if(count($words) == 2) { return cmdEmpty($words[1]); }                         // Envelope
 			else { return false; }
 		break;
 
@@ -138,34 +133,99 @@ function cmdHandler($cmd) {
 
 function cmdDB($subtype, $table) {
 	if($subtype == 'create') { 
-		return dbCreateTable($dbc, $table, tableDefs($table)); 
+		return dbCreateTable(dbConnect(), $table, tableDefs($table)); 
 	} else if($subtype == 'drop') { 
-		return dbDropTable($dbc, $table); 
+		return dbDropTable(dbConnect(), $table); 
 	} else {
 		return false;
 	}
 }
 
 
-function cmdCreate($envelope) {
+function cmdCreate($name, $refill, $goal) {
+	if(ctype_alpha($name)) {
+		if($refill[0] == 'r' && $goal[0] == 'g') {
+			$refill = intval(substr($refill, 1));
+			$goal   = intval(substr($goal, 1));
 
+			if($refill && $goal && $refill > 0 && $goal > 0) {
+				return createEnvelope(dbConnect(), $name, $refill, $goal);
+			} else {
+				return 'Refill and goal must be positive integers';
+			}
+		} else {
+			return 'Invalid refill or goal syntax';
+		}
+	} else {
+		return 'Invalid envelope name';
+	}
+}
+
+function cmdRename($old, $new) {
+	if(ctype_alpha($old) && ctype_alpha($new)) {
+		return renameEnvelope(dbConnect(), $old, $new);
+	} else {
+		return 'Invalid envelope name';
+	}
 }
 
 
 
 function cmdSet($envelope, $attribute, $value) {
+	if(ctype_alpha($envelope)) {
+		$value = intval($value);
+		if($value && $value > 0) {
+			switch($attribute) {
+				case 'refill':
+					return setRefill(dbConnect(), $envelope, $value);
+				break;
 
+				case 'goal':
+					return setGoal(dbConnect(), $envelope, $value);
+				break;
+
+				case 'balance*':
+					return setBalance(dbConnect(), $envelope, $value);
+				break;
+
+				default:
+					return false;
+			}
+		} else {
+			return 'Value must be a positive integer';
+		}
+	} else {
+		return 'Invalid envelope name';
+	}
 }
 
 
-function cmdRename($old, $new) {
+function cmdTransfer($amount, $from, $to) {
+	if(ctype_alpha($from) && ctype_alpha($to)) {
+		$amount = intval($amount);
+		if($amount && $amount > 0) {
+			$dbc = dbConnect();
+			
+			$resFrom = changeBalance($dbc, $from, $amount * -1);
+			$resTo   = changeBalance($dbc, $to, $amount);
 
+			return $resFrom . ' ' . $resTo;
+		} else {
+			return 'Amount must be a positive integer';
+		}
+	} else {
+		return 'Invalid envelope name';
+	}
 }
 
 
 
 function cmdEmpty($envelope) {
-
+	if(ctype_alpha($envelope)) {
+		return emptyEnvelope(dbConnect(), $envelope);
+	} else {
+		return 'Invalid envelope name';
+	}
 }
 
 
@@ -216,6 +276,9 @@ function cmdEmpty($envelope) {
 		#cancel {
 			background-color: #e6e6e6;
 			border: 2px solid #4d4d4d;
+		}
+		#response {
+			font-size: 3em;
 		}
 	</style>
 </head>
