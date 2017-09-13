@@ -1,9 +1,17 @@
 <?php 
 
+require 'db.php';
+
+function displayAllEnvelopes() {
+	$envelopes = getEnvelopes(dbConnect());
+	
+	foreach($envelopes['data'] as $envelope) {
+		displayOneEnvelope($envelope->name, $envelope->goal, $envelope->balance);
+	}
+}
 
 
-
-function displayEnvelope($name, $goal, $balance) {
+function displayOneEnvelope($name, $goal, $balance) {
 	$width = round(($balance / $goal) * 100) . '%';
 
 	echo "<a href='spend.php?envelope=$name'>";
@@ -71,11 +79,7 @@ function displayEnvelope($name, $goal, $balance) {
 <body>
 	<p id='header' class='basics'>Envelopes</p>
 	
-	<?php 
-		displayEnvelope('Groceries', 60, 20);
-		displayEnvelope('Fun', 200, 100);
-		displayEnvelope('Random', 100, 35);
-	?>
+	<?php displayAllEnvelopes(); ?>
 
 </body>
 </html>

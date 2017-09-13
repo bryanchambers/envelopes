@@ -1,7 +1,19 @@
 <?php 
+
+require 'db.php';
+
 if(isset($_GET['envelope'])) {
 	$envelope = $_GET['envelope'];
+
+	if(isset($_GET['amount'])) {
+		$amount = intval($_GET['amount']);
+		if($amount && $amount > 0) {
+			changeBalance(dbConnect(), $envelope, $amount * -1);
+		}
+	}
 }
+
+
 ?>
 
 <!DOCTYPE html>
@@ -51,8 +63,9 @@ if(isset($_GET['envelope'])) {
 </head>
 <body>
 	<p id='header' class='elements'><?php echo $envelope; ?></p>
-	<form>
+	<form method='get' action=''>
 		<input id='amount' class='elements' type='number' name='amount' placeholder='enter amount'>
+		<input type='hidden' name='envelope' value='<?php echo $envelope; ?>'>
 		<input id='submit' class='elements' type='submit' name='submit' value='Spend'>
 	</form>
 	<a href='/envelopes'><button id='cancel' class='elements'>Cancel</button></a>

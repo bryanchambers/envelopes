@@ -39,7 +39,7 @@ empty*
 
 require 'db.php';
 
-
+//mail('bchambers@athenium.com', 'Envelopes', 'Test');
 
 function getCommand() {
 	if(isset($_POST['cmd']) && $_POST['cmd'] != '') {
@@ -85,7 +85,7 @@ function cmdHandler($cmd) {
 	$type  = $words[0];
 
 	switch($type) {
-		case 'db*':
+		case 'db':
 			if(count($words) == 3) { return cmdDB($words[1], $words[2]); }                 // Subtype, Table Name
 			else { return false; }
 		break;
@@ -106,11 +106,11 @@ function cmdHandler($cmd) {
 		break;
 
 		case 'transfer':
-			if(count($words) == 6) { return cmdRename($words[1], $words[3], $words[5]); }  // Amount, From, To
+			if(count($words) == 6) { return cmdTransfer($words[1], $words[3], $words[5]); }  // Amount, From, To
 			else { return false; }
 		break;
 
-		case 'empty*':
+		case 'empty':
 			if(count($words) == 2) { return cmdEmpty($words[1]); }                         // Envelope
 			else { return false; }
 		break;
@@ -184,7 +184,7 @@ function cmdSet($envelope, $attribute, $value) {
 					return setGoal(dbConnect(), $envelope, $value);
 				break;
 
-				case 'balance*':
+				case 'balance':
 					return setBalance(dbConnect(), $envelope, $value);
 				break;
 
