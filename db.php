@@ -185,6 +185,27 @@ function setRefill($dbc, $envelope, $refill) {
 
 
 
+function refill($dbc, $envelope) {
+	try {
+		if($envelope == 'all') {
+			$conditions = '';
+		} else {
+			$conditions = "WHERE name = :envelope LIMIT 1";
+		}
+		$query = $dbc->prepare("UPDATE envelopes SET balance = balance + refill $conditions");
+		$query->bindParam(':envelope', $envelope);
+		
+		$query->execute();
+		return "Refilled $envelope";
+	} catch(PDOException $err) {
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
+	}
+}
+
+
+
+
+
 function setGoal($dbc, $envelope, $goal) {
 	try {
 		$query = $dbc->prepare("UPDATE envelopes SET goal=:goal WHERE name=:envelope LIMIT 1");

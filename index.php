@@ -74,12 +74,16 @@ function displayOneEnvelope($name, $goal, $balance) {
 			line-height: 150px;
 			margin-left: 20px;
 		}
+		.button {
+			background-color: #e6e6e6;
+			border: 2px solid #4d4d4d;
+		}
 	</style>
 </head>
 <body>
 	<p id='header' class='basics'>Envelopes</p>
 	
 	<?php displayAllEnvelopes(); ?>
-
+	<a href='admin.php'><button class='basics button'>Admin</button></a>
 </body>
 </html>

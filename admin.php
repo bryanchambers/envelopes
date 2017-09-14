@@ -105,6 +105,11 @@ function cmdHandler($cmd) {
 			else { return false; }
 		break;
 
+		case 'refill':
+			if(count($words) == 2) { return cmdRefill($words[1]); }                        // Envelope
+			else { return false; }
+		break;
+
 		case 'transfer':
 			if(count($words) == 6) { return cmdTransfer($words[1], $words[3], $words[5]); }  // Amount, From, To
 			else { return false; }
@@ -213,6 +218,15 @@ function cmdTransfer($amount, $from, $to) {
 		} else {
 			return 'Amount must be a positive integer';
 		}
+	} else {
+		return 'Invalid envelope name';
+	}
+}
+
+
+function cmdRefill($envelope) {
+	if(ctype_alpha($envelope)) {
+		return refill(dbConnect(), $envelope);
 	} else {
 		return 'Invalid envelope name';
 	}

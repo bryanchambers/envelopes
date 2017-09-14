@@ -9,6 +9,7 @@ if(isset($_GET['envelope'])) {
 		$amount = intval($_GET['amount']);
 		if($amount && $amount > 0) {
 			changeBalance(dbConnect(), $envelope, $amount * -1);
+			header('Location: /envelopes');
 		}
 	}
 }
