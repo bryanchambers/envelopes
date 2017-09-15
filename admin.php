@@ -82,7 +82,7 @@ function parseCommand() {
 
 function cmdHandler($cmd) {
 	$words = explode(' ', trim($cmd));
-	$type  = $words[0];
+	$type  = strtolower($words[0]);
 
 	switch($type) {
 		case 'db':
@@ -95,8 +95,18 @@ function cmdHandler($cmd) {
 			else { return false; }
 		break;
 
+		case 'delete':
+			if(count($words) == 2) { return cmdDelete($words[1]); }                       // Envelope
+			else { return false; }
+		break;
+
+		case 'move':
+			if(count($words) == 2) { return cmdMoveToTop($words[1]); }                    // Envelope
+			else { return false; }
+		break;
+
 		case 'rename':
-			if(count($words) == 4) { return cmdRename($words[1], $words[2]); }             // Old Name, New Name
+			if(count($words) == 4) { return cmdRename($words[1], $words[3]); }             // Old Name, New Name
 			else { return false; }
 		break;
 
@@ -149,26 +159,55 @@ function cmdDB($subtype, $table) {
 
 function cmdCreate($name, $refill, $goal) {
 	if(ctype_alpha($name)) {
-		if($refill[0] == 'r' && $goal[0] == 'g') {
-			$refill = intval(substr($refill, 1));
-			$goal   = intval(substr($goal, 1));
+		$refill = intval($refill);
+		$goal   = intval($goal);
 
-			if($refill && $goal && $refill > 0 && $goal > 0) {
-				return createEnvelope(dbConnect(), $name, $refill, $goal);
-			} else {
-				return 'Refill and goal must be positive integers';
-			}
+		if($refill && $goal && $refill > 0 && $goal > 0) {
+			return createEnvelope(dbConnect(), $name, $refill, $goal);
 		} else {
-			return 'Invalid refill or goal syntax';
+			return 'Refill and goal must be positive integers';
 		}
 	} else {
 		return 'Invalid envelope name';
 	}
 }
 
+
+
+
+function cmdDelete($envelope) {
+	if(ctype_alpha($envelope)) {
+		return deleteEnvelope(dbConnect(), $envelope);
+	} else {
+		return 'Invalid envelope name';
+	}
+}
+
+
+
+
+function cmdMoveToTop($envelope) {
+	if(ctype_alpha($envelope)) {
+		if($position = getSortPosition(dbConnect(), $envelope)) {
+			$shift = shiftEnvelopesDown(dbConnect(), $position);
+			$move  = moveEnvelopeToTop(dbConnect(), $envelope);
+			return $shift . ' ' . $move;
+		}
+	} else {
+		return 'Invalid envelope name';
+	}
+}
+
+
+
+
 function cmdRename($old, $new) {
 	if(ctype_alpha($old) && ctype_alpha($new)) {
-		return renameEnvelope(dbConnect(), $old, $new);
+		if($new != 'to' && $old != 'to') {
+			return renameEnvelope(dbConnect(), $old, $new);
+		} else {
+			return 'Invalid syntax';
+		}
 	} else {
 		return 'Invalid envelope name';
 	}
@@ -244,6 +283,9 @@ function cmdEmpty($envelope) {
 
 
 
+
+
+
 ?>
 
 <!DOCTYPE html>
@@ -283,7 +325,7 @@ function cmdEmpty($envelope) {
 			border: none;
 			border-radius: 0;
 		}
-		#submit {
+		#submit-btn {
 			background-color: #7ce997;
 			border: 2px solid #158431;
 		}
@@ -295,13 +337,23 @@ function cmdEmpty($envelope) {
 			font-size: 3em;
 		}
 	</style>
+
+	<script>
+		function main() {
+			document.getElementById('cmd').addEventListener('keypress', function(event) {
+				if(event.keyCode == 13) {
+					document.forms['form'].submit();
+				}
+			});
+		}
+	</script>
 </head>
-<body>
+<body onload='main()'>
 	<p id='header' class='elements'>Admin</p>
-	<form method='post' action=''>
+	<form id='form' method='post' action=''>
 		<textarea id='cmd' class='elements' name='cmd' placeholder='>'><?php displayCommand(); ?></textarea>
 		<p id='response' class='elements'><?php parseCommand(); ?></p>
-		<input id='submit' class='elements' type='submit' name='submit' value='Run'>
+		<input id='submit-btn' class='elements' type='submit' name='submit-btn' value='Run'>
 	</form>
 	<a href='/envelopes'><button id='cancel' class='elements'>Cancel</button></a>
 </body>

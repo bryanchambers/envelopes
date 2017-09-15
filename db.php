@@ -37,9 +37,10 @@ function tableDefs($table) {
 	$defs['envelopes'] = "
 		CREATE TABLE IF NOT EXISTS envelopes(
 			name    VARCHAR(30) PRIMARY KEY NOT NULL,
-			refill  INT,
-			goal    INT,
-			balance INT)";
+			refill  SMALLINT NOT NULL,
+			goal    SMALLINT NOT NULL,
+			balance SMALLINT NOT NULL,
+			sort    TINYINT  NOT NULL)";
 
 	return $defs[$table];
 }
@@ -96,7 +97,7 @@ function getData($query_string, $dbc) {
 
 
 function getEnvelopes($dbc) {
-	$query_string = "SELECT * FROM envelopes LIMIT 100";
+	$query_string = "SELECT * FROM envelopes ORDER BY sort ASC LIMIT 100";
 	return getData($query_string, $dbc);
 }
 
@@ -112,10 +113,10 @@ function getEnvelopes($dbc) {
 
 function createEnvelope($dbc, $name, $refill, $goal) {
 	try {
-		$query = $dbc->prepare("INSERT INTO envelopes(name, refill, goal) VALUES(:name, :refill, :goal)");
+		$query = $dbc->prepare("INSERT INTO envelopes(name, refill, goal, balance, sort) VALUES(:name, :refill, :goal, 0, 0)");
 		$query->bindParam(':name',   $name);
 		$query->bindParam(':refill', $refill);
-		$query->bindParam(':goal',  $goal);
+		$query->bindParam(':goal',   $goal);
 		
 		$query->execute();
 		return "Created new envelope $name with a refill of $refill and a goal of $goal.";
@@ -123,6 +124,69 @@ function createEnvelope($dbc, $name, $refill, $goal) {
 		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
 	}
 }
+
+
+
+function deleteEnvelope($dbc, $name) {
+	try {
+		$query = $dbc->prepare("DELETE FROM envelopes WHERE name=:name");
+		$query->bindParam(':name',   $name);
+		
+		$query->execute();
+		return "Deleted $name";
+	} catch(PDOException $err) {
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
+	}
+}
+
+
+
+function getSortPosition($dbc, $envelope) {
+	try {
+		$query = $dbc->prepare("SELECT sort FROM envelopes WHERE name=:envelope LIMIT 1");
+		$query->bindParam(':envelope', $envelope);
+		$query->execute();
+		
+		$row = $query->fetchObject();
+		return $row->sort;
+	} catch(PDOException $err) {
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
+	}
+}
+
+
+
+
+function shiftEnvelopesDown($dbc, $position) {
+	try {
+		$query = $dbc->prepare("UPDATE envelopes SET sort = sort + 1 WHERE sort < :position");
+		$query->bindParam(':position', $position);
+		
+		$query->execute();
+		return "Shifted envelopes below position $position";
+	} catch(PDOException $err) {
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
+	}
+}
+
+
+function moveEnvelopeToTop($dbc, $envelope) {
+	try {
+		$query = $dbc->prepare("UPDATE envelopes SET sort = 1 WHERE name = :envelope LIMIT 1");
+		$query->bindParam(':envelope', $envelope);
+		
+		$query->execute();
+		return "Moved $envelope to top";
+	} catch(PDOException $err) {
+		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
+	}
+}
+
+
+
+
+
+
 
 
 function changeBalance($dbc, $envelope, $change) {
