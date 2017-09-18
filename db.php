@@ -108,7 +108,7 @@ function getMaxPosition($dbc) {
 	$data = getData($query_string, $dbc);
 
 	if($data['success']) {
-		$position = 
+		//$position = 
 	} else {
 		return false;
 	}

@@ -300,7 +300,7 @@ function cmdEmpty($envelope) {
 		.elements {
 			width: 94%;
 			height: 150px;
-			font-size: 5em;
+			font-size: 70px;
 			padding: 0;
 			margin: 3%;
 			border-radius: 5px;
@@ -309,33 +309,34 @@ function cmdEmpty($envelope) {
 			-webkit-appearance: none;
 		}
 		#header, #cmd {
-			border: none;
 			outline: none;
 			background-color: #f2f2f2;
 			width: 94%;
 		}
 		#header {
+			border: none;
 			text-align: center;
 			font-weight: bold;
-			font-size: 7em;
+			font-size: 100px;
 		}
 		#cmd {
-			font-size: 3em;
+			border: none;
+			font-family: monospace;
+			font-size: 30px;
 			height: 150px;
 			color: #158431;
-			border: none;
-			border-radius: 0;
 		}
 		#submit-btn {
 			background-color: #7ce997;
 			border: 2px solid #158431;
 		}
-		#cancel {
+		#home {
 			background-color: #e6e6e6;
 			border: 2px solid #4d4d4d;
 		}
 		#response {
-			font-size: 3em;
+			font-family: monospace;
+			font-size: 30px;
 		}
 	</style>
 
@@ -353,10 +354,10 @@ function cmdEmpty($envelope) {
 	<p id='header' class='elements'>Admin</p>
 	<form id='form' method='post' action=''>
 		<textarea id='cmd' class='elements' name='cmd' placeholder='>'><?php displayCommand(); ?></textarea>
-		<p id='response' class='elements'><?php parseCommand(); ?></p>
+		<p id='response' class='elements'>>> <?php parseCommand(); ?></p>
 		<input id='submit-btn' class='elements' type='submit' name='submit-btn' value='Run'>
 	</form>
-	<a href='/envelopes'><button id='cancel' class='elements'>Cancel</button></a>
+	<a href='/envelopes'><button id='home' class='elements'>Home</button></a>
 </body>
 </html>
 
