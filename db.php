@@ -40,7 +40,7 @@ function tableDefs($table) {
 			refill  SMALLINT NOT NULL,
 			goal    SMALLINT NOT NULL,
 			balance SMALLINT NOT NULL,
-			sort    TINYINT  NOT NULL)";
+			sort    SMALLINT NOT NULL)";
 
 	return $defs[$table];
 }
@@ -103,8 +103,16 @@ function getEnvelopes($dbc) {
 
 
 
+function getMaxPosition($dbc) {
+	$query_string = "SELECT MAX(sort) FROM envelopes";
+	$data = getData($query_string, $dbc);
 
-
+	if($data['success']) {
+		$position = 
+	} else {
+		return false;
+	}
+}
 
 
 
@@ -113,7 +121,8 @@ function getEnvelopes($dbc) {
 
 function createEnvelope($dbc, $name, $refill, $goal) {
 	try {
-		$query = $dbc->prepare("INSERT INTO envelopes(name, refill, goal, balance, sort) VALUES(:name, :refill, :goal, 0, 0)");
+		$
+		$query = $dbc->prepare("INSERT INTO envelopes(name, refill, goal, balance) VALUES(:name, :refill, :goal, IFNULL(MAX(sort) + 1, 1))");
 		$query->bindParam(':name',   $name);
 		$query->bindParam(':refill', $refill);
 		$query->bindParam(':goal',   $goal);
@@ -141,6 +150,7 @@ function deleteEnvelope($dbc, $name) {
 
 
 
+
 function getSortPosition($dbc, $envelope) {
 	try {
 		$query = $dbc->prepare("SELECT sort FROM envelopes WHERE name=:envelope LIMIT 1");
@@ -153,6 +163,9 @@ function getSortPosition($dbc, $envelope) {
 		return "Database error *<span class='error'" . $err->getMessage() . "</span>*";
 	}
 }
+
+
+
 
 
 

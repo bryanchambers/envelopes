@@ -188,7 +188,8 @@ function cmdDelete($envelope) {
 
 function cmdMoveToTop($envelope) {
 	if(ctype_alpha($envelope)) {
-		if($position = getSortPosition(dbConnect(), $envelope)) {
+		$position = getSortPosition(dbConnect(), $envelope);
+		if(intval($position)) {
 			$shift = shiftEnvelopesDown(dbConnect(), $position);
 			$move  = moveEnvelopeToTop(dbConnect(), $envelope);
 			return $shift . ' ' . $move;
@@ -320,7 +321,7 @@ function cmdEmpty($envelope) {
 		}
 		#cmd {
 			font-size: 3em;
-			height: 300px;
+			height: 150px;
 			color: #158431;
 			border: none;
 			border-radius: 0;
