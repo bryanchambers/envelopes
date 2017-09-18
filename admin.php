@@ -60,6 +60,7 @@ function displayCommand() {
 
 
 function parseCommand() {
+	echo '>> ';
 	$cmd = getCommand();
 	
 	if($cmd) {
@@ -69,6 +70,8 @@ function parseCommand() {
 		} else { 
 			echo 'Invalid command';
 		}
+	} else {
+		echo 'Reporting for duty';
 	}
 }
 
@@ -322,8 +325,8 @@ function cmdEmpty($envelope) {
 		#cmd {
 			border: none;
 			font-family: monospace;
-			font-size: 30px;
-			height: 150px;
+			font-size: 50px;
+			height: 100px;
 			color: #158431;
 		}
 		#submit-btn {
@@ -336,12 +339,14 @@ function cmdEmpty($envelope) {
 		}
 		#response {
 			font-family: monospace;
-			font-size: 30px;
+			font-size: 50px;
 		}
 	</style>
 
 	<script>
 		function main() {
+			document.getElementById("cmd").focus();
+
 			document.getElementById('cmd').addEventListener('keypress', function(event) {
 				if(event.keyCode == 13) {
 					document.forms['form'].submit();
@@ -353,8 +358,8 @@ function cmdEmpty($envelope) {
 <body onload='main()'>
 	<p id='header' class='elements'>Admin</p>
 	<form id='form' method='post' action=''>
-		<textarea id='cmd' class='elements' name='cmd' placeholder='>'><?php displayCommand(); ?></textarea>
-		<p id='response' class='elements'>>> <?php parseCommand(); ?></p>
+		<textarea id='cmd' class='elements' name='cmd' placeholder='Enter command'><?php displayCommand(); ?></textarea>
+		<p id='response' class='elements'> <?php parseCommand(); ?></p>
 		<input id='submit-btn' class='elements' type='submit' name='submit-btn' value='Run'>
 	</form>
 	<a href='/envelopes'><button id='home' class='elements'>Home</button></a>

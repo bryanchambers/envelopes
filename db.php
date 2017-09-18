@@ -78,7 +78,7 @@ function dbDropTable($dbc, $table) {
 
 
 function getData($query_string, $dbc) {
-	$output = ['success' => true, 'data' => [], 'errors' => []];
+	$output = ['success' => true, 'data' => [], 'errors' => ''];
 
 	try {
 		$query = $dbc->query($query_string);
@@ -88,7 +88,7 @@ function getData($query_string, $dbc) {
 		}
 	} catch(PDOException $err) {
 		$output['success']  = false;
-		$output['errors'][] = $err->getMessage();
+		$output['errors']   = $err->getMessage();
 	}
 
 	return $output;
@@ -104,12 +104,13 @@ function getEnvelopes($dbc) {
 
 
 function getMaxPosition($dbc) {
-	$query_string = "SELECT MAX(sort) FROM envelopes";
+	$query_string = "SELECT MAX(sort) AS 'max' FROM envelopes";
 	$data = getData($query_string, $dbc);
 
 	if($data['success']) {
-		//$position = 
+		return $data['data'][0]->max;
 	} else {
+		echo $data['errors'];
 		return false;
 	}
 }
@@ -121,11 +122,18 @@ function getMaxPosition($dbc) {
 
 function createEnvelope($dbc, $name, $refill, $goal) {
 	try {
-		$
-		$query = $dbc->prepare("INSERT INTO envelopes(name, refill, goal, balance) VALUES(:name, :refill, :goal, IFNULL(MAX(sort) + 1, 1))");
+		$sort = getMaxPosition($dbc);
+		if($sort) {
+			$sort++;
+		} else {
+			$sort = 1;
+		}
+		
+		$query = $dbc->prepare("INSERT INTO envelopes(name, refill, goal, balance, sort) VALUES(:name, :refill, :goal, 0, :sort)");
 		$query->bindParam(':name',   $name);
 		$query->bindParam(':refill', $refill);
 		$query->bindParam(':goal',   $goal);
+		$query->bindParam(':sort',   $sort);
 		
 		$query->execute();
 		return "Created new envelope $name with a refill of $refill and a goal of $goal.";
