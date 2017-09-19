@@ -10,6 +10,7 @@ function dbConnect() {
 	$password = $info['password'];
 	
 	$dbc = new PDO("mysql:host=$host;dbname=$db", $username, $password);
+	
 	$dbc->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 	return $dbc;
 }
@@ -49,15 +50,88 @@ function tableDefs($table) {
 
 
 function dbCreateTable($dbc, $table, $query) {
-	$dbc->query($query);
-	
-	$warnings = dbGetWarnings($dbc);
-	if($warnings) {
-		return "Database warning *<span class='error'>$warnings</span>*";
-	} else {
-		return "Created table $table.";
+	try {
+		$dbc->query($query);
+		
+		$warnings = dbGetWarnings($dbc);
+		if($warnings) {
+			return "Database warning *<span class='error'>$warnings</span>*";
+		} else {
+			return "Created table $table.";
+		}
+	} catch(PDOException $err) {
+		$error = $err->getMessage();
+		if($error && $error != '') {
+
+		} else {
+			return "";
+		}
 	}
 }
+
+
+
+
+
+
+
+
+
+//Query Types
+//   Non-Prepared, No Data
+//   Non-Prepared, Returns Data
+//   Prepared, No Data
+//   Prepared, Returns Data
+
+
+
+function dbQueryBasic($dbc, $query, $msg) {
+	try{
+		$result = $dbc->query($query);
+		
+		if($msg) {
+			return dbWarning(dbGetWarnings($dbc), $msg);
+		} else {
+			$data = [];
+
+			while($row = $result->fetchObject()) {
+				$data[] = $row;
+			}
+			return $data;
+		}
+	} catch(PDOException $err) {
+		return dbError($err->getMessage());
+	}
+}
+
+
+
+function dbQueryPrep($dbc, $query, $msg) {
+	
+}
+
+
+
+
+function dbWarning($warning, $msg) {
+	if($warning && $warning != '') {
+		return "<br/>>> Database warning <br/>>> <span class='sql-msg'>$warning</span>";
+	} else {
+		return "<br/>>> $msg";
+	}
+}
+
+
+
+function dbError($error) {
+	if($error && $error != '') {
+		return "<br/>>> Database error <br/>>> <span class='sql-msg'>$error</span>";
+	} else {
+		return "<br/>>> Something something something error";
+	}
+}
+
+
 
 
 
