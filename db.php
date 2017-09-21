@@ -21,6 +21,7 @@ function dbConnect() {
 
 function dbGetWarnings($dbc) {
 	$warnings = $dbc->query("SHOW WARNINGS")->fetch();
+	
 	if(isset($warnings['Message'])) {
 		return $warnings['Message'];
 	} else {
@@ -49,26 +50,6 @@ function tableDefs($table) {
 
 
 
-function dbCreateTable($dbc, $table, $query) {
-	try {
-		$dbc->query($query);
-		
-		$warnings = dbGetWarnings($dbc);
-		if($warnings) {
-			return "Database warning *<span class='error'>$warnings</span>*";
-		} else {
-			return "Created table $table.";
-		}
-	} catch(PDOException $err) {
-		$error = $err->getMessage();
-		if($error && $error != '') {
-
-		} else {
-			return "";
-		}
-	}
-}
-
 
 
 
@@ -85,51 +66,110 @@ function dbCreateTable($dbc, $table, $query) {
 
 
 
-function dbQueryBasic($dbc, $query, $msg) {
-	try{
-		$result = $dbc->query($query);
-		
-		if($msg) {
-			return dbWarning(dbGetWarnings($dbc), $msg);
+function dbResultHandler($dbc, $query, $usePreparedStatement, $successMessage) {
+	try {
+		if($usePreparedStatement) {
+			$query->execute();
+			$result = $query;
 		} else {
-			$data = [];
-
-			while($row = $result->fetchObject()) {
-				$data[] = $row;
-			}
-			return $data;
+			$result = $dbc->query($query);
 		}
-	} catch(PDOException $err) {
-		return dbError($err->getMessage());
+
+		if($successMessage)  { return dbSuccessHandler($dbc, $successMessage); } 
+		else                 { return dbDataHandler($result); }
+	} 
+	catch(PDOException $err) { return dbErrorHandler($err->getMessage()); }
+}
+
+
+
+
+
+function dbDataHandler($result) {
+	$data = [];
+
+	while($row = $result->fetchObject()) { 
+		$data[] = $row;
+	}
+
+	switch(count($data)) {
+		case 0: return false; break;
+		
+		case 1:
+			$row = $data[0];
+			
+			switch(count($row)) {
+				case 0:  return false;   break;
+				case 1:  return $row[0]; break;
+				default: return $row;
+			}
+			break;
+
+		default: return $data;
 	}
 }
 
 
 
-function dbQueryPrep($dbc, $query, $msg) {
-	
-}
+function dbSuccessHandler($dbc, $successMessage) {
+	$warning = dbGetWarnings($dbc);
 
-
-
-
-function dbWarning($warning, $msg) {
 	if($warning && $warning != '') {
-		return "<br/>>> Database warning <br/>>> <span class='sql-msg'>$warning</span>";
+		return adminMessageWrapper('warning', $warning);
 	} else {
-		return "<br/>>> $msg";
+		return adminMessageWrapper('normal', $successMessage);
 	}
 }
 
 
 
-function dbError($error) {
+function dbErrorHandler($error) {
 	if($error && $error != '') {
-		return "<br/>>> Database error <br/>>> <span class='sql-msg'>$error</span>";
+		return adminMessageWrapper('error', $warning);
 	} else {
-		return "<br/>>> Something something something error";
+		return adminMessageWrapper('normal', "Well, this is embarassing. Something went wrong but I have no idea what.");
 	}
 }
+
+
+
+function adminMessageWrapper($messageType, $messageText) {
+	$cursor = '>>';
+	$class  = 'db-msg';
+
+	if($messageType == 'warning' or $messageType == 'error') {
+		$message = "<br/>$cursor Database $messageType";
+		$details = "<br/>$cursor <span class='$class'>$messageText</span>";
+		return $message . $details;
+	} 
+	else { 
+		return "<br/>$cursor $messageText";
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+function dbCreateTable($dbc, $table) {
+	$query = tableDefs($table);
+	$successMessage = "Created table $table";
+	$usePreparedStatement = false;
+
+	return dbResultHandler($dbc, $query, $usePreparedStatement, $successMessage);
+}
+
+
+
 
 
 
