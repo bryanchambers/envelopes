@@ -2,36 +2,42 @@
 
 /*
 
-SUPER ADMIN
-------------
-db create [name]
-db drop [name]
-empty [name]
-set [name] balance to [value]
 
-
-ADMIN
---------
-create [name] [refill] [goal]
-rename [old name] to [new name]
-set [name] goal to [value]
-set [name] refill to [value]
 
 
 
 
 COMMANDS
 ----------
-db
-	create*
-	drop*
-create
-set
-	goal
-	refill
-	balance*
-rename
-empty*
+db create [table]
+db drop   [table]
+
+create [envelope] [refill] [goal]
+delete [envelope]
+
+transfer [value] from [envelope] to [envelope]
+
+set [envelope] refill  to [value]
+set [envelope] goal    to [value]
+set [envelope] balance to [value]
+
+empty [envelope]
+
+move [envelope] [value]
+move [envelope] top
+move [envelope] bottom
+
+reorder [envelope1,envelope2,envelope3]
+reorder reset
+
+swap [envelope] and [envelope]
+
+rename [old name] to [new name]
+
+
+
+
+
 
 
 
@@ -59,25 +65,30 @@ function displayCommand() {
 
 
 
+
+
 function parseCommand() {
-	echo '>> ';
 	$cmd = getCommand();
 	
-	if($cmd) {
-		$response = cmdHandler($cmd);
-		if($response) {
-			echo $response; 
-		} else { 
-			echo 'Invalid command';
-		}
-	} else {
-		echo 'Reporting for duty';
-	}
+	if($cmd) { echo cmdHandler($cmd); } 
+	else     { echo defaultMessage(); }
 }
 
 
 
-
+function defaultMessage() {
+	$messages = [
+		"Reporting for duty",
+		"All systems operational",
+		"Message3",
+		"Message4",
+		"Message5",
+		"Message6",
+		"Message7",
+		"Message8",
+	];
+	return $messages[intval(round(rand(0, count($messages) - 1), 0))];
+}
 
 
 
@@ -88,54 +99,19 @@ function cmdHandler($cmd) {
 	$type  = strtolower($words[0]);
 
 	switch($type) {
-		case 'db':
-			if(count($words) == 3) { return cmdDB($words[1], $words[2]); }                 // Subtype, Table Name
-			else { return false; }
-		break;
-
-		case 'create':
-			if(count($words) == 4) { return cmdCreate($words[1], $words[2], $words[3]); } // Name, Refill, Goal
-			else { return false; }
-		break;
-
-		case 'delete':
-			if(count($words) == 2) { return cmdDelete($words[1]); }                       // Envelope
-			else { return false; }
-		break;
-
-		case 'move':
-			if(count($words) == 2) { return cmdMoveToTop($words[1]); }                    // Envelope
-			else { return false; }
-		break;
-
-		case 'rename':
-			if(count($words) == 4) { return cmdRename($words[1], $words[3]); }             // Old Name, New Name
-			else { return false; }
-		break;
-
-		case 'set':
-			if(count($words) == 5) { return cmdSet($words[1], $words[2], $words[4]); }     // Envelope, Attribute, Value
-			else { return false; }
-		break;
-
-		case 'refill':
-			if(count($words) == 2) { return cmdRefill($words[1]); }                        // Envelope
-			else { return false; }
-		break;
-
-		case 'transfer':
-			if(count($words) == 6) { return cmdTransfer($words[1], $words[3], $words[5]); }  // Amount, From, To
-			else { return false; }
-		break;
-
-		case 'empty':
-			if(count($words) == 2) { return cmdEmpty($words[1]); }                         // Envelope
-			else { return false; }
-		break;
-
-		default:
-			return false;
+		case 'db':       if(count($words) == 3) { return cmdDB(       $words[1], $words[2]); }            break;
+		case 'create':   if(count($words) >= 3) { return cmdCreate(   $words[1], $words[2], $words[3]); } break;
+		case 'delete':   if(count($words) == 2) { return cmdDelete(   $words[1]); }                       break;
+		case 'transfer': if(count($words) == 6) { return cmdTransfer( $words[1], $words[3], $words[5]); } break;
+		case 'set':      if(count($words) == 5) { return cmdSet(      $words[1], $words[2], $words[4]); } break;
+		case 'empty':    if(count($words) == 2) { return cmdEmpty(    $words[1]); }                       break;
+		case 'move':     if(count($words) == 3) { return cmdMoveToTop($words[1]); }                       break;
+		case 'reorder':  if(count($words) == 2) { return cmdMoveToTop($words[1]); }                       break;
+		case 'swap':     if(count($words) == 4) { return cmdMoveToTop($words[1]); }                       break;
+		case 'rename':   if(count($words) == 4) { return cmdRename(   $words[1], $words[3]); }            break;
+		case 'refill':   if(count($words) == 2) { return cmdRefill(   $words[1]); }                       break;
 	}
+	return false;
 }
 
 
