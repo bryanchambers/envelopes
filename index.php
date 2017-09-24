@@ -5,14 +5,22 @@ require 'db.php';
 function displayAllEnvelopes() {
 	$envelopes = getEnvelopes(dbConnect());
 	
-	foreach($envelopes['data'] as $envelope) {
-		displayOneEnvelope($envelope->name, $envelope->goal, $envelope->balance);
+	if($envelopes) {
+		if(count($envelopes) > 1) {
+			foreach($envelopes as $envelope) {
+				displayOneEnvelope($envelope->name, $envelope->goal, $envelope->balance);
+			}
+		} else {
+			displayOneEnvelope($envelopes->name, $envelopes->goal, $envelopes->balance);
+		}
 	}
 }
 
 
 function displayOneEnvelope($name, $goal, $balance) {
-	$width = round(($balance / $goal) * 100) . '%';
+	$width = round(($balance / $goal) * 100);
+	if($width < 0) { $width = 0; }
+	$width .= '%';
 
 	echo "<a href='spend.php?envelope=$name'>";
 		echo "<div class='basics envelope'>";

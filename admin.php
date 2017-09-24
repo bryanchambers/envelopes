@@ -80,12 +80,8 @@ function defaultMessage() {
 	$messages = [
 		"Reporting for duty",
 		"All systems operational",
-		"Message3",
-		"Message4",
-		"Message5",
-		"Message6",
-		"Message7",
-		"Message8",
+		"Online and standing by",
+		"Adulting at maximum"
 	];
 	return $messages[intval(round(rand(0, count($messages) - 1), 0))];
 }
