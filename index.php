@@ -46,7 +46,7 @@ function displayOneEnvelope($name, $goal, $balance) {
 			font-size: 4em;
 			padding: 0;
 			margin: 3%;
-			border-radius: 5px;
+			border-radius: 15px;
 			font-family: Helvetica;
 			color: #666666;
 			-webkit-appearance: none;
@@ -64,14 +64,14 @@ function displayOneEnvelope($name, $goal, $balance) {
 		}
 		.envelope {
 			background-color: #f2f2f2;
-			border: 2px solid #158431;
+			border: 5px solid #158431;
 		}
 		.spent-bar {
 			background-color: #7ce997;
-			border-radius: 5px 0 0 5px;
+			border-radius: 10px 0 0 10px;
 			padding: 0;
-			margin: 0;
-			height: 100%;
+			margin: 5px;
+			height: 140px;
 			width: 10%;
 			white-space: nowrap;
 		}
@@ -79,8 +79,9 @@ function displayOneEnvelope($name, $goal, $balance) {
 			text-decoration: none;
 		}
 		.spent-val, .env-name {
-			line-height: 150px;
+			line-height: 140px;
 			margin-left: 20px;
+			font-family: monospace;
 		}
 		.button {
 			background-color: #e6e6e6;
