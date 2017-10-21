@@ -20,7 +20,7 @@ function displayAllEnvelopes() {
 function displayOneEnvelope($name, $goal, $balance) {
 	$width = round(($balance / $goal) * 100);
 	if($width < 0) { $width = 0; }
-	if($width > 99.5) { $width = 99.5; }
+	if($width > 99) { $width = 99; }
 	$width .= '%';
 
 	echo "<a href='spend.php?envelope=$name'>";
