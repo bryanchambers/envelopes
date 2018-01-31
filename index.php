@@ -18,16 +18,28 @@ function displayAllEnvelopes() {
 
 
 function displayOneEnvelope($name, $goal, $balance) {
-	$width = round(($balance / $goal) * 100);
-	if($width < 0) { $width = 0; }
-	if($width > 99) { $width = 99; }
+	if($goal == 0 or ($goal < 0 && $balance >= 0)) {
+		$width = 99;
+	} else {
+		$width = round((abs($balance) / abs($goal)) * 100);
+		if($width > 99) { $width = 99; }
+	}
 	$width .= '%';
+
+	if($balance < 0) {
+		$color = '#e87d7d';
+		$float = 'right';
+	} else {
+		$color = '#7de87d';
+		$float = 'left';
+	}
+
+	$label = "<span class='spent-val' style='float: $float'>$balance $name</span>";
 
 	echo "<a href='spend.php?envelope=$name'>";
 		echo "<div class='basics envelope'>";
-			echo "<div class='spent-bar' style='width: $width'>";
-				echo "<span class='spent-val'>$balance</span>";
-				echo "<span class='env-name'>$name</span>";
+			echo "<div class='spent-bar' style='width: $width; background-color: $color; float: $float'>";
+			echo $label;
 	echo "</div></div></a>";
 }
 
@@ -82,6 +94,7 @@ function displayOneEnvelope($name, $goal, $balance) {
 		.spent-val, .env-name {
 			line-height: 140px;
 			margin-left: 20px;
+			margin-right: 20px;
 			font-family: monospace;
 		}
 		.button {

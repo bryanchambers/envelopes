@@ -1,7 +1,7 @@
 <?php
 
 function dbConnect() {
-	$file = file_get_contents('db.json', FILE_USE_INCLUDE_PATH);
+	$file = file_get_contents('db-prod.json', FILE_USE_INCLUDE_PATH);
 	$info = json_decode($file, true);
 
 	$host     = $info['host'];

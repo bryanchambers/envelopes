@@ -137,10 +137,10 @@ function cmdCreate($name, $refill, $goal) {
 		$refill = intval($refill);
 		$goal   = intval($goal);
 
-		if($refill && $goal && $refill > 0 && $goal > 0) {
+		if($refill !== false && $goal !== false) {
 			return createEnvelope(dbConnect(), $name, $refill, $goal);
 		} else {
-			return 'Refill and goal must be positive integers';
+			return 'Refill and goal must be integers';
 		}
 	} else {
 		return 'Invalid envelope name';
@@ -194,7 +194,7 @@ function cmdRename($old, $new) {
 function cmdSet($envelope, $attribute, $value) {
 	if(ctype_alpha($envelope)) {
 		$value = intval($value);
-		if($value && $value > 0) {
+		if($value !== false) {
 			switch($attribute) {
 				case 'refill':
 					return setRefill(dbConnect(), $envelope, $value);
@@ -212,7 +212,7 @@ function cmdSet($envelope, $attribute, $value) {
 					return false;
 			}
 		} else {
-			return 'Value must be a positive integer';
+			return 'Value must be an integer';
 		}
 	} else {
 		return 'Invalid envelope name';
@@ -223,7 +223,7 @@ function cmdSet($envelope, $attribute, $value) {
 function cmdTransfer($amount, $from, $to) {
 	if(ctype_alpha($from) && ctype_alpha($to)) {
 		$amount = intval($amount);
-		if($amount && $amount > 0) {
+		if($amount !== false && $amount >= 0) {
 			$dbc = dbConnect();
 			
 			$resFrom = changeBalance($dbc, $from, $amount * -1);
